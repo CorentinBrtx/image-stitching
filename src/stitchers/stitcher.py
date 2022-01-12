@@ -1,6 +1,7 @@
+import logging
+
 import cv2
 import numpy as np
-import logging
 
 
 class Stitcher:
@@ -13,10 +14,6 @@ class Stitcher:
         descriptor = cv2.SIFT_create()
         kps, features = descriptor.detectAndCompute(image, None)
 
-        # convert the keypoints from KeyPoint objects to NumPy arrays
-        # kps = np.float32([kp.pt for kp in kps])
-
-        # return a tuple of keypoints and features
         return (kps, features)
 
     def matchKeypoints(self, kpsA, kpsB, featuresA, featuresB, ratio, reprojThresh):
@@ -38,7 +35,7 @@ class Stitcher:
             ptsA = np.float32([kpsA[match.queryIdx].pt for match in matches])
             ptsB = np.float32([kpsB[match.trainIdx].pt for match in matches])
 
-            (H, status) = cv2.findHomography(ptsA, ptsB, cv2.RANSAC, reprojThresh)
+            (H, status) = cv2.findHomography(ptsB, ptsA, cv2.RANSAC, reprojThresh)
 
             return (matches, H, status)
 
@@ -47,9 +44,9 @@ class Stitcher:
     def stitch(self, images, ratio=0.75, reprojThresh=4.0, showMatches=False):
 
         logging.info("Detecting and describing keypoints...")
-        (imageB, imageA) = images
-        (kpsA, featuresA) = self.detectAndDescribe(imageA)
-        (kpsB, featuresB) = self.detectAndDescribe(imageB)
+        imageA, imageB = images
+        kpsA, featuresA = self.detectAndDescribe(imageA)
+        kpsB, featuresB = self.detectAndDescribe(imageB)
 
         logging.info("Matching features...")
         # match features between the two images
@@ -62,12 +59,12 @@ class Stitcher:
 
         logging.info("Applying homography...")
         # otherwise, apply a perspective warp to stitch the images together
-        (matches, H, _) = M
+        matches, H, _ = M
         result = cv2.warpPerspective(
-            imageA, H, (imageA.shape[1] + imageB.shape[1], imageA.shape[0])
+            imageB, H, (imageB.shape[1] + imageA.shape[1], imageB.shape[0])
         )
-        result[0 : imageB.shape[0], 0 : imageB.shape[1]] = imageB
-        # check to see if the keypoint matches should be visualized
+        result[0 : imageA.shape[0], 0 : imageA.shape[1]] = imageA
+
         if showMatches:
             logging.info("Building matches image...")
             img_matches = np.empty(
