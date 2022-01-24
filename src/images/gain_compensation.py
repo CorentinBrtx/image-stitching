@@ -48,6 +48,9 @@ def get_gain_compensations(images, pair_matches, sigma_n: float = 10.0, sigma_g:
 
         gains[:, channel] = np.linalg.solve(coefs, res)
 
-    gains_normalized = gains / gains.max()
+    max_pixel_value = np.max([image.image for image in images])
 
-    return gains_normalized
+    if gains.max() * max_pixel_value > 255:
+        gains = gains / (gains.max() * max_pixel_value) * 255
+
+    return gains
