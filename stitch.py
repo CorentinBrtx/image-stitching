@@ -8,7 +8,8 @@ from typing import List
 import cv2
 import numpy as np
 
-from src.images import Image, apply_transformation, get_gain_compensations
+from src.images import Image, get_gain_compensations
+from src.images.multiband_blending import multi_band_blending
 from src.matches import MultiImageMatches, PairMatch, find_connected_components
 
 logging.basicConfig(level=logging.INFO)
@@ -84,16 +85,13 @@ for connected_component in connected_components:
 
 time.sleep(0.1)
 
+for image in images:
+    image.image = (image.image * image.gain[np.newaxis, np.newaxis, :]).astype(np.uint8)
+
 results = []
 
 for connected_component in connected_components:
-    result = np.zeros((0, 0, 3))
-    weights = np.zeros((0, 0, 3))
-    offset = np.eye(3)
-    for image in connected_component:
-        result, added_offset, weights = apply_transformation(result, image, offset, weights)
-        offset = added_offset @ offset
-    results.append(result)
+    results.append(multi_band_blending(connected_component))
 
 
 os.makedirs(os.path.join(args["data_dir"], "results"), exist_ok=True)

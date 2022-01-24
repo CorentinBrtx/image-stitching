@@ -1,9 +1,6 @@
 from typing import List, Tuple
 
-import cv2
 import numpy as np
-
-from src.images.image import Image
 
 
 def apply_homography(H, point):
@@ -52,62 +49,17 @@ def get_new_size(corners_images) -> Tuple[int]:
     return width, height
 
 
-def weights_array(size):
-    if size % 2 == 1:
-        return np.concatenate(
-            [np.linspace(0, 1, (size + 1) // 2), np.linspace(1, 0, (size + 1) // 2)[1:]]
-        )
-    else:
-        return np.concatenate([np.linspace(0, 1, size // 2), np.linspace(1, 0, size // 2)])
-
-
-def apply_transformation(
-    panorama: np.ndarray, image: Image, offset: np.ndarray, weights: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray]:
-
-    H = offset @ image.H
-    corners = get_new_corners(image.image, H)
+def get_new_parameters(
+    panorama: np.ndarray, image: np.ndarray, H: np.ndarray
+) -> Tuple[Tuple[int], np.ndarray]:
+    corners = get_new_corners(image, H)
     added_offset = get_offset(corners)
 
-    corners_image = get_new_corners(image.image, added_offset @ H)
-    corners_panorama = get_new_corners(panorama, added_offset)
+    corners_image = get_new_corners(image, added_offset @ H)
+    if panorama is None:
+        size = get_new_size([corners_image])
+    else:
+        corners_panorama = get_new_corners(panorama, added_offset)
+        size = get_new_size([corners_image, corners_panorama])
 
-    size = get_new_size([corners_image, corners_panorama])
-
-    if panorama.shape[0] == 0:
-        panorama = np.zeros((*size, 3), dtype=np.uint8)
-        weights = np.zeros((*size, 3), dtype=np.uint8)
-
-    panorama = cv2.warpPerspective(panorama, added_offset, size)
-    weights = cv2.warpPerspective(weights, added_offset, size)
-    new_image = cv2.warpPerspective(
-        image.image * image.gain[np.newaxis, np.newaxis, :],
-        added_offset @ H,
-        size,
-    )
-
-    image_weights = (
-        weights_array(image.image.shape[0])[:, np.newaxis]
-        @ weights_array(image.image.shape[1])[:, np.newaxis].T
-    )
-    image_weights = np.repeat(
-        cv2.warpPerspective(image_weights, added_offset @ H, size)[:, :, np.newaxis], 3, axis=2
-    )
-
-    normalized_weights = np.zeros_like(weights)
-    normalized_weights = np.divide(
-        weights, (weights + image_weights), where=weights + image_weights != 0
-    )
-
-    panorama = np.where(
-        np.logical_and(
-            np.repeat(np.sum(panorama, axis=2)[:, :, np.newaxis], 3, axis=2) == 0,
-            np.repeat(np.sum(new_image, axis=2)[:, :, np.newaxis], 3, axis=2) == 0,
-        ),
-        0,
-        new_image * (1 - normalized_weights) + panorama * normalized_weights,
-    ).astype(np.uint8)
-
-    new_weights = (weights + image_weights) / (weights + image_weights).max()
-
-    return panorama, added_offset, new_weights
+    return size, added_offset
