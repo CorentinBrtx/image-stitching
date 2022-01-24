@@ -66,7 +66,11 @@ def apply_transformation(
         panorama = np.zeros((*size, 3), dtype=np.uint8)
 
     panorama = cv2.warpPerspective(panorama, added_offset, size)
-    new_image = cv2.warpPerspective(image.image, added_offset @ H, size)
+    new_image = cv2.warpPerspective(
+        (image.image * image.gain[np.newaxis, np.newaxis, :]).astype(np.uint8),
+        added_offset @ H,
+        size,
+    )
 
     panorama = np.where(
         np.repeat(np.sum(new_image, axis=2)[:, :, np.newaxis], 3, axis=2) > 0, new_image, panorama

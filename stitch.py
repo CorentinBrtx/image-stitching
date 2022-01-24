@@ -2,13 +2,13 @@ import argparse
 import glob
 import logging
 import os
+import time
 from typing import List
 
 import cv2
 import numpy as np
-import time
 
-from src.images import Image, apply_transformation
+from src.images import Image, apply_transformation, get_gain_compensations
 from src.matches import MultiImageMatches, PairMatch, find_connected_components
 
 logging.basicConfig(level=logging.INFO)
@@ -63,6 +63,17 @@ for connected_component in connected_components:
                 images_added.add(pair_match.image_a)
                 break
 
+time.sleep(0.1)
+
+for connected_component in connected_components:
+    component_matches = [
+        pair_match for pair_match in pair_matches if pair_match.image_a in connected_components[0]
+    ]
+
+    gains = get_gain_compensations(connected_components[0], component_matches)
+
+    for i, image in enumerate(connected_components[0]):
+        image.gain = gains[i]
 
 time.sleep(0.1)
 

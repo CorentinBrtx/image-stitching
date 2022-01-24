@@ -12,8 +12,9 @@ class PairMatch:
         self.H = None
         self.status = None
         self.overlap = None
-        self.Iab = None
-        self.Iba = None
+        self.area_overlap = None
+        self._Iab = None
+        self._Iba = None
         self.matchpoints_a = None
         self.matchpoints_b = None
 
@@ -38,12 +39,13 @@ class PairMatch:
         if self.H is None:
             self.compute_homography()
 
-        mask_a = np.zeros_like(self.image_a.image[:, :, 0], dtype=np.uint8)
+        mask_a = np.ones_like(self.image_a.image[:, :, 0], dtype=np.uint8)
         mask_b = cv2.warpPerspective(
-            np.zeros_like(self.image_b.image[:, :, 0], dtype=np.uint8), self.H, mask_a.shape[::-1]
+            np.ones_like(self.image_b.image[:, :, 0], dtype=np.uint8), self.H, mask_a.shape[::-1]
         )
 
         self.overlap = mask_a * mask_b
+        self.area_overlap = self.overlap.sum()
 
     def is_valid(self, alpha: float = 8, beta: float = 0.3):
         if self.overlap is None:
@@ -65,16 +67,51 @@ class PairMatch:
     def is_in(self, image: Image) -> bool:
         return self.image_a == image or self.image_b == image
 
+    @property
+    def Iab(self):
+        if self._Iab is None:
+            self.set_intensities()
+        return self._Iab
+
+    @Iab.setter
+    def Iab(self, Iab):
+        self._Iab = Iab
+
+    @property
+    def Iba(self):
+        if self._Iba is None:
+            self.set_intensities()
+        return self._Iba
+
+    @Iba.setter
+    def Iba(self, Iba):
+        self._Iba = Iba
+
     def set_intensities(self):
         if self.overlap is None:
             self.set_overlap()
 
-        Ia = self.image_a.sum(axis=2) / 3
-        Ib = self.image_b.sum(axis=2) / 3
+        # Ia = self.image_a.image.sum(axis=2) / 3
+        # Ib = self.image_b.image.sum(axis=2) / 3
 
         inverse_overlap = cv2.warpPerspective(
-            self.overlap, np.linalg.inv(self.H), self.image_b.shape[1::-1]
+            self.overlap, np.linalg.inv(self.H), self.image_b.image.shape[1::-1]
         )
 
-        self.Iab = sum(Ia * self.overlap) / self.overlap.sum()
-        self.Iba = sum(Ib * inverse_overlap) / inverse_overlap.sum()
+        if self.overlap.sum() == 0:
+            print(self.image_a.path, self.image_b.path)
+
+        self._Iab = (
+            np.sum(
+                self.image_a.image * np.repeat(self.overlap[:, :, np.newaxis], 3, axis=2),
+                axis=(0, 1),
+            )
+            / self.overlap.sum()
+        )
+        self._Iba = (
+            np.sum(
+                self.image_b.image * np.repeat(inverse_overlap[:, :, np.newaxis], 3, axis=2),
+                axis=(0, 1),
+            )
+            / inverse_overlap.sum()
+        )
