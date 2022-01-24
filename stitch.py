@@ -41,8 +41,15 @@ for connected_component in connected_components:
 
     pair_match = component_matches[0]
     pair_match.compute_homography()
-    pair_match.image_a.set_homography(np.eye(3))
-    pair_match.image_b.set_homography(pair_match.H)
+    if len([match for match in pair_matches if match.is_in(pair_match.image_a)]) > len(
+        [match for match in pair_matches if match.is_in(pair_match.image_b)]
+    ):
+        pair_match.image_a.set_homography(np.eye(3))
+        pair_match.image_b.set_homography(pair_match.H)
+    else:
+        pair_match.image_b.set_homography(np.eye(3))
+        pair_match.image_a.set_homography(np.linalg.inv(pair_match.H))
+
     images_added.add(pair_match.image_a)
     images_added.add(pair_match.image_b)
 
@@ -81,9 +88,10 @@ results = []
 
 for connected_component in connected_components:
     result = np.zeros((0, 0, 3))
+    weights = np.zeros((0, 0, 3))
     offset = np.eye(3)
     for image in connected_component:
-        result, added_offset = apply_transformation(result, image, offset)
+        result, added_offset, weights = apply_transformation(result, image, offset, weights)
         offset = added_offset @ offset
     results.append(result)
 
