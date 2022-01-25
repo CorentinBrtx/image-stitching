@@ -4,6 +4,12 @@ Image Stitching algorithm with multi-panoramas, gain compensation, simple blendi
 
 The implementation is strongly based on the 2007 paper **Automatic Panoramic Image Stitching using Invariant Features** by Matthew Brown and David G. Lowe : <http://matthewalunbrown.com/papers/ijcv2007.pdf>
 
+## Install
+
+Clone the repository, and run the following command:
+
+    pip install -r requirements.txt
+
 ## Usage
 
 Simply put all your images in a single folder (possibly images of different panoramas), and run the following command:
