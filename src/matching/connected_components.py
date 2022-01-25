@@ -1,15 +1,22 @@
 from typing import List
 
-from src.matches.pair_match import PairMatch
+from src.matching.pair_match import PairMatch
 
 
 def find_connected_components(pair_matches: List[PairMatch]) -> List[List[PairMatch]]:
     """
     Find the connected components of the given pair matches.
-    :param pair_matches: The list of pair matches.
-    :return: The list of connected components.
-    """
 
+    Parameters
+    ----------
+    pair_matches : List[PairMatch]
+        The list of pair matches.
+
+    Returns
+    -------
+    connected_components : List[List[PairMatch]]
+        List of connected components.
+    """
     connected_components = []
     pair_matches_to_check = pair_matches.copy()
     component_id = 0
@@ -35,7 +42,7 @@ def find_connected_components(pair_matches: List[PairMatch]) -> List[List[PairMa
             size = len(connected_component)
         connected_components.append(list(connected_component))
         for image in connected_component:
-            image.component = component_id
+            image.component_id = component_id
         component_id += 1
 
     return connected_components

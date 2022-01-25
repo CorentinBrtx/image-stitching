@@ -1,11 +1,25 @@
+from typing import List, Optional
+
 import cv2
 import numpy as np
 
-from src.images.image import Image
+from src.images import Image
 
 
 class PairMatch:
-    def __init__(self, image_a: Image, image_b: Image, matches=None):
+    def __init__(self, image_a: Image, image_b: Image, matches: Optional[List] = None):
+        """
+        Create a new PairMatch object.
+
+        Parameters
+        ----------
+        image_a : Image
+            First image of the pair.
+        image_b : Image
+            Second image of the pair.
+        matches : Optional[List], optional
+            List of matches between image_a and image_b, by default None
+        """
         self.image_a = image_a
         self.image_b = image_b
         self.matches = matches
@@ -18,7 +32,19 @@ class PairMatch:
         self.matchpoints_a = None
         self.matchpoints_b = None
 
-    def compute_homography(self, ransac_reproj_thresh: float = 5, ransac_max_iter: int = 500):
+    def compute_homography(
+        self, ransac_reproj_thresh: float = 5, ransac_max_iter: int = 500
+    ) -> None:
+        """
+        Compute the homography between the two images of the pair.
+
+        Parameters
+        ----------
+        ransac_reproj_thresh : float, optional
+            Reprojection threshold used in the RANSAC algorithm, by default 5
+        ransac_max_iter : int, optional
+            Number of maximum iterations for the RANSAC algorithm, by default 500
+        """
         self.matchpoints_a = np.float32(
             [self.image_a.keypoints[match.queryIdx].pt for match in self.matches]
         )
@@ -34,8 +60,10 @@ class PairMatch:
             maxIters=ransac_max_iter,
         )
 
-    def set_overlap(self):
-
+    def set_overlap(self) -> None:
+        """
+        Compute and set the overlap region between the two images.
+        """
         if self.H is None:
             self.compute_homography()
 
@@ -47,7 +75,22 @@ class PairMatch:
         self.overlap = mask_a * mask_b
         self.area_overlap = self.overlap.sum()
 
-    def is_valid(self, alpha: float = 8, beta: float = 0.3):
+    def is_valid(self, alpha: float = 8, beta: float = 0.3) -> bool:
+        """
+        Check if the pair match is valid (i.e. if there are enough inliers with regard to the overlap region).
+
+        Parameters
+        ----------
+        alpha : float, optional
+            alpha parameter used in the comparison, by default 8
+        beta : float, optional
+            beta parameter used in the comparison, by default 0.3
+
+        Returns
+        -------
+        valid : bool
+            True if the pair match is valid, False otherwise.
+        """
         if self.overlap is None:
             self.set_overlap()
 
@@ -64,7 +107,20 @@ class PairMatch:
 
         return self.status.sum() > alpha + beta * matches_in_overlap.shape[0]
 
-    def is_in(self, image: Image) -> bool:
+    def contains(self, image: Image) -> bool:
+        """
+        Check if the given image is contained in the pair match.
+
+        Parameters
+        ----------
+        image : Image
+            Image to check.
+
+        Returns
+        -------
+        bool
+            True if the given image is contained in the pair match, False otherwise.
+        """
         return self.image_a == image or self.image_b == image
 
     @property
@@ -87,12 +143,13 @@ class PairMatch:
     def Iba(self, Iba):
         self._Iba = Iba
 
-    def set_intensities(self):
+    def set_intensities(self) -> None:
+        """
+        Compute the intensities of the two images in the overlap region.
+        Used for the gain compensation calculation.
+        """
         if self.overlap is None:
             self.set_overlap()
-
-        # Ia = self.image_a.image.sum(axis=2) / 3
-        # Ib = self.image_b.image.sum(axis=2) / 3
 
         inverse_overlap = cv2.warpPerspective(
             self.overlap, np.linalg.inv(self.H), self.image_b.image.shape[1::-1]

@@ -1,3 +1,8 @@
+"""
+------ NOT USED IN THE MAIN SCRIPT ------
+Stitcher for two images.
+"""
+
 import logging
 
 import cv2
