@@ -3,7 +3,7 @@ import numpy as np
 
 
 class Image:
-    def __init__(self, path: str):
+    def __init__(self, path: str, size: int = None):
         """
         Image constructor.
 
@@ -11,9 +11,19 @@ class Image:
         ----------
         path : str
             path to the image
+        size : int, optional
+            maximum dimension to resize the image to, by default None
         """
         self.path = path
         self.image: np.ndarray = cv2.imread(path)
+        if size is not None:
+            h, w = self.image.shape[:2]
+            if max(w, h) > size:
+                if w > h:
+                    self.image = cv2.resize(self.image, (size, int(h * size / w)))
+                else:
+                    self.image = cv2.resize(self.image, (int(w * size / h), size))
+
         self.keypoints = None
         self.features = None
         self.H: np.ndarray = np.eye(3)

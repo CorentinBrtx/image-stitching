@@ -4,7 +4,6 @@ Create panoramas from a set of images.
 """
 
 import argparse
-import glob
 import logging
 import os
 import time
@@ -30,6 +29,7 @@ parser.add_argument(
     action="store_true",
     help="use multi-band blending instead of simple blending",
 )
+parser.add_argument("--size", type=int, help="maximum dimension to resize the images to")
 parser.add_argument(
     "--num-bands", type=int, default=5, help="number of bands for multi-band blending"
 )
@@ -47,9 +47,14 @@ if args["verbose"]:
 
 logging.info("Gathering images...")
 
-image_paths = glob.glob(os.path.join(args["data_dir"], "*.jpg"))
+valid_images_extensions = {".jpg", ".png", ".bmp", ".jpeg"}
 
-images = [Image(path) for path in image_paths]
+image_paths = []
+for file in os.listdir(args["data_dir"]):
+    if os.path.splitext(file)[1].lower() in valid_images_extensions:
+        image_paths.append(os.path.join(args["data_dir"], file))
+
+images = [Image(path, args.get("size")) for path in image_paths]
 
 logging.info("Found %d images", len(images))
 logging.info("Computing features with SIFT...")
