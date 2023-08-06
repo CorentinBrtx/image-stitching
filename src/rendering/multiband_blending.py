@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 import cv2
 import numpy as np
 
@@ -9,25 +7,18 @@ from src.rendering.utils import get_new_parameters, single_weights_matrix
 
 def add_weights(
     weights_matrix: np.ndarray, image: Image, offset: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Add the weights corresponding to the given image to the given existing weights matrix.
 
-    Parameters
-    ----------
-    weights_matrix : np.ndarray
-        Existing weights matrix.
-    image : Image
-        New image to add to the weights matrix.
-    offset : np.ndarray
-        Offset already applied to the weights matrix.
+    Args:
+        weights_matrix: Existing weights matrix
+        image: New image to add to the weights matrix
+        offset: Offset already applied to the weights matrix
 
-    Returns
-    -------
-    weights_matrix, offset : Tuple[np.ndarray, np.ndarray]
-        The updated weights matrix and the updated offset.
+    Returns:
+        weights_matrix, offset: The updated weights matrix and the updated offset
     """
-
     H = offset @ image.H
     size, added_offset = get_new_parameters(weights_matrix, image.image, H)
 
@@ -47,21 +38,16 @@ def add_weights(
     return weights_matrix, added_offset @ offset
 
 
-def get_max_weights_matrix(images: List[Image]) -> Tuple[np.ndarray, np.ndarray]:
+def get_max_weights_matrix(images: list[Image]) -> tuple[np.ndarray, np.ndarray]:
     """
     Compute the maximum weights matrix for the given images.
 
-    Parameters
-    ----------
-    images : List[Image]
-        List of images to compute the maximum weights matrix for.
+    Args:
+        images: List of images to compute the maximum weights matrix for
 
-    Returns
-    -------
-    max_weights_matrix : np.ndarray
-        Maximum weights matrix.
-    offset : np.ndarray
-        Offset matrix.
+    Returns:
+        max_weights_matrix: Maximum weights matrix
+        offset: Offset matrix
     """
     weights_matrix = None
     offset = np.eye(3)
@@ -80,25 +66,19 @@ def get_max_weights_matrix(images: List[Image]) -> Tuple[np.ndarray, np.ndarray]
 
 
 def get_cropped_weights(
-    images: List[Image], weights: np.ndarray, offset: np.ndarray
-) -> List[np.ndarray]:
+    images: list[Image], weights: np.ndarray, offset: np.ndarray
+) -> list[np.ndarray]:
     """
     Convert a global weights matrix to a list of weights matrices for each image,
     where each weight matrix is the size of the corresponding image.
 
-    Parameters
-    ----------
-    images : List[Image]
-        List of images to convert the weights matrix for.
-    weights : np.ndarray
-        Global weights matrix.
-    offset : np.ndarray
-        Offset matrix.
+    Args:
+        images: List of images to convert the weights matrix for
+        weights: Global weights matrix
+        offset: Offset matrix
 
-    Returns
-    -------
-    cropped_weights : List[np.ndarray]
-        List of weights matrices for each image.
+    Returns:
+        cropped_weights: List of weights matrices for each image
     """
     cropped_weights = []
     for i, image in enumerate(images):
@@ -112,33 +92,25 @@ def get_cropped_weights(
 
 
 def build_band_panorama(
-    images: List[Image],
-    weights: List[np.ndarray],
-    bands: List[np.ndarray],
+    images: list[Image],
+    weights: list[np.ndarray],
+    bands: list[np.ndarray],
     offset: np.ndarray,
-    size: Tuple[int, int],
+    size: tuple[int, int],
 ) -> np.ndarray:
     """
     Build a panorama from the given bands and weights matrices.
     The images are needed for their homographies.
 
-    Parameters
-    ----------
-    images : List[Image]
-        Images to build the panorama from.
-    weights : List[np.ndarray]
-        Weights matrices for each image.
-    bands : List[np.ndarray]
-        Bands for each image.
-    offset : np.ndarray
-        Offset matrix.
-    size : Tuple[int, int]
-        Size of the panorama.
+    Args:
+        images: Images to build the panorama from
+        weights: Weights matrices for each image
+        bands: Bands for each image
+        offset: Offset matrix
+        size: Size of the panorama
 
-    Returns
-    -------
-    panorama : np.ndarray
-        Panorama for the given bands and weights.
+    Returns:
+        panorama: Panorama for the given bands and weights
     """
     pano_weights = np.zeros(size)
     pano_bands = np.zeros((*size, 3))
@@ -155,25 +127,18 @@ def build_band_panorama(
     )
 
 
-def multi_band_blending(images: List[Image], num_bands: int, sigma: float) -> np.ndarray:
+def multi_band_blending(images: list[Image], num_bands: int, sigma: float) -> np.ndarray:
     """
     Build a panorama from the given images using multi-band blending.
 
-    Parameters
-    ----------
-    images : List[Image]
-        Images to build the panorama from.
-    num_bands : int, optional
-        Number of bands to use for multi-band blending, by default 7
-    sigma : float, optional
-        Standard deviation for the multi-band blending, by default 1
+    Args:
+        images: Images to build the panorama from
+        num_bands: Number of bands to use for multi-band blending
+        sigma: Standard deviation for the multi-band blending
 
-    Returns
-    -------
-    panorama : np.ndarray
-        Panorama after multi-band blending.
+    Returns:
+        panorama: Panorama after multi-band blending
     """
-
     max_weights_matrix, offset = get_max_weights_matrix(images)
     size = max_weights_matrix.shape[1:]
 

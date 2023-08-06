@@ -3,16 +3,13 @@ import numpy as np
 
 
 class Image:
-    def __init__(self, path: str, size: int = None):
+    def __init__(self, path: str, size: int | None = None) -> None:
         """
         Image constructor.
 
-        Parameters
-        ----------
-        path : str
-            path to the image
-        size : int, optional
-            maximum dimension to resize the image to, by default None
+        Args:
+            path: path to the image
+            size: maximum dimension to resize the image to
         """
         self.path = path
         self.image: np.ndarray = cv2.imread(path)
@@ -30,10 +27,8 @@ class Image:
         self.component_id: int = 0
         self.gain: np.ndarray = np.ones(3, dtype=np.float32)
 
-    def compute_features(self):
-        """
-        Compute the features and the keypoints of the image using SIFT.
-        """
+    def compute_features(self) -> None:
+        """Compute the features and the keypoints of the image using SIFT."""
         descriptor = cv2.SIFT_create()
         keypoints, features = descriptor.detectAndCompute(self.image, None)
         self.keypoints = keypoints

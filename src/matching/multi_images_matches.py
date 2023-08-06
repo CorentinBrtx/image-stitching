@@ -1,5 +1,3 @@
-from typing import List
-
 import cv2
 
 from src.images import Image
@@ -7,37 +5,28 @@ from src.matching.pair_match import PairMatch
 
 
 class MultiImageMatches:
-    def __init__(self, images: List[Image], ratio: float = 0.75):
+    def __init__(self, images: list[Image], ratio: float = 0.75) -> None:
         """
         Create a new MultiImageMatches object.
 
-        Parameters
-        ----------
-        images : List[Image]
-            images to compare
-        ratio : float, optional
-            ratio used for the Lowe's ratio test, by default 0.75
+        Args:
+            images: images to compare
+            ratio: ratio used for the Lowe's ratio test
         """
-
         self.images = images
         self.matches = {image.path: {} for image in images}
         self.ratio = ratio
 
-    def get_matches(self, image_a: Image, image_b: Image) -> List:
+    def get_matches(self, image_a: Image, image_b: Image) -> list:
         """
         Get matches for the given images.
 
-        Parameters
-        ----------
-        image_a : Image
-            First image.
-        image_b : Image
-            Second image.
+        Args:
+            image_a: First image
+            image_b: Second image
 
-        Returns
-        -------
-        matches : List
-            List of matches between the two images.
+        Returns:
+            matches: List of matches between the two images
         """
         if image_b.path not in self.matches[image_a.path]:
             matches = self.compute_matches(image_a, image_b)
@@ -45,19 +34,15 @@ class MultiImageMatches:
 
         return self.matches[image_a.path][image_b.path]
 
-    def get_pair_matches(self, max_images: int = 6) -> List[PairMatch]:
+    def get_pair_matches(self, max_images: int = 6) -> list[PairMatch]:
         """
         Get the pair matches for the given images.
 
-        Parameters
-        ----------
-        max_images : int, optional
-            Number of matches maximum for each image, by default 6
+        Args:
+            max_images: Number of matches maximum for each image
 
-        Returns
-        -------
-        pair_matches : List[PairMatch]
-            List of pair matches.
+        Returns:
+            pair_matches: List of pair matches
         """
         pair_matches = []
         for i, image_a in enumerate(self.images):
@@ -73,30 +58,24 @@ class MultiImageMatches:
                         pair_matches.append(pair_match)
         return pair_matches
 
-    def compute_matches(self, image_a: Image, image_b: Image) -> List:
+    def compute_matches(self, image_a: Image, image_b: Image) -> list:
         """
         Compute matches between image_a and image_b.
 
-        Parameters
-        ----------
-        image_a : Image
-            First image.
-        image_b : Image
-            Second image.
+        Args:
+            image_a: First image
+            image_b: Second image
 
-        Returns
-        -------
-        matches : List
-            Matches between image_a and image_b.
+        Returns:
+            matches: Matches between image_a and image_b
         """
-
         matcher = cv2.DescriptorMatcher_create("BruteForce")
         matches = []
 
-        rawMatches = matcher.knnMatch(image_a.features, image_b.features, 2)
+        raw_matches = matcher.knnMatch(image_a.features, image_b.features, 2)
         matches = []
 
-        for m, n in rawMatches:
+        for m, n in raw_matches:
             # ensure the distance is within a certain ratio of each
             # other (i.e. Lowe's ratio test)
             if m.distance < n.distance * self.ratio:

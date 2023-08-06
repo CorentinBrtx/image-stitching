@@ -4,6 +4,5 @@ max-line-length=100
 [MESSAGES CONTROL]
 disable=invalid-name
 
-
 [BASIC]
 good-names=i,j,x1,x2,y1,y2,df,id,n,fr,en,db,t,ws

@@ -6,6 +6,7 @@ The implementation is strongly based on the 2007 paper **Automatic Panoramic Ima
 
 ## Install
 
+**Python 3.11** or higher is required.
 Clone the repository, and run the following command:
 
     pip install -r requirements.txt

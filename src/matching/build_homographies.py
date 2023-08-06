@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 
 from src.images import Image
@@ -7,18 +5,15 @@ from src.matching.pair_match import PairMatch
 
 
 def build_homographies(
-    connected_components: List[List[Image]], pair_matches: List[PairMatch]
+    connected_components: list[list[Image]], pair_matches: list[PairMatch]
 ) -> None:
     """
     Build homographies for each image of each connected component, using the pair matches.
     The homographies are saved in the images themselves.
 
-    Parameters
-    ----------
-    connected_components : List[List[Image]]
-        The connected components of the panorama.
-    pair_matches : List[PairMatch]
-        The valid pair matches.
+    Args:
+        connected_components: The connected components of the panorama
+        pair_matches: The valid pair matches
     """
     for connected_component in connected_components:
         component_matches = [
@@ -65,7 +60,7 @@ def build_homographies(
                     images_added.add(pair_match.image_b)
                     break
 
-                elif pair_match.image_a not in images_added and pair_match.image_b in images_added:
+                if pair_match.image_a not in images_added and pair_match.image_b in images_added:
                     pair_match.compute_homography()
                     homography = np.linalg.inv(pair_match.H) @ current_homography
                     pair_match.image_a.H = pair_match.image_b.H @ homography

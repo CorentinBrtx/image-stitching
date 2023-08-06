@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 
 from src.images import Image
@@ -7,21 +5,16 @@ from src.matching import PairMatch
 
 
 def set_gain_compensations(
-    images: List[Image], pair_matches: List[PairMatch], sigma_n: float = 10.0, sigma_g: float = 0.1
+    images: list[Image], pair_matches: list[PairMatch], sigma_n: float = 10.0, sigma_g: float = 0.1
 ) -> None:
     """
     Compute the gain compensation for each image, and save it into the images objects.
 
-    Parameters
-    ----------
-    images : List[Image]
-        Images of the panorama.
-    pair_matches : List[PairMatch]
-        Pair matches between the images.
-    sigma_n : float, optional
-        Standard deviation of the normalized intensity error, by default 10.0
-    sigma_g : float, optional
-        Standard deviation of the gain, by default 0.1
+    Args:
+        images: Images of the panorama
+        pair_matches: Pair matches between the images
+        sigma_n: Standard deviation of the normalized intensity error
+        sigma_g: Standard deviation of the gain
     """
     coefficients = []
     results = []

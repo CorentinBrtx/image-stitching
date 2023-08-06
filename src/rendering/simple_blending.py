@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 import cv2
 import numpy as np
 
@@ -9,31 +7,21 @@ from src.rendering.utils import get_new_parameters, single_weights_matrix
 
 def add_image(
     panorama: np.ndarray, image: Image, offset: np.ndarray, weights: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Add a new image to the panorama using the provided offset and weights.
 
-    Parameters
-    ----------
-    panorama : np.ndarray
-        Existing panorama.
-    image : Image
-        Image to add to the panorama.
-    offset : np.ndarray
-        Offset already applied to the panorama.
-    weights : np.ndarray
-        Weights matrix of the panorama.
+    Args:
+        panorama: Existing panorama
+        image: Image to add to the panorama
+        offset: Offset already applied to the panorama
+        weights: Weights matrix of the panorama
 
-    Returns
-    -------
-    panorama : np.ndarray
-        Panorama with the new image.
-    offset : np.ndarray
-        New offset matrix.
-    weights : np.ndarray
-        New weights matrix.
+    Returns:
+        panorama: Panorama with the new image
+        offset: New offset matrix
+        weights: New weights matrix
     """
-
     H = offset @ image.H
     size, added_offset = get_new_parameters(panorama, image.image, H)
 
@@ -70,21 +58,16 @@ def add_image(
     return panorama, added_offset @ offset, new_weights
 
 
-def simple_blending(images: List[Image]) -> np.ndarray:
+def simple_blending(images: list[Image]) -> np.ndarray:
     """
-    Build a panorama for the given images using simple blending.
+    Build a panorama from the given images using simple blending.
 
-    Parameters
-    ----------
-    images : List[Image]
-        Images to build the panorama for.
+    Args:
+        images: Images to build the panorama from
 
-    Returns
-    -------
-    panorama : np.ndarray
-        Panorama of the given images.
+    Returns:
+        panorama: Panorama of the given images
     """
-
     panorama = None
     weights = None
     offset = np.eye(3)

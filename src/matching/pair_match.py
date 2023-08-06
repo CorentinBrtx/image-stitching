@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 import cv2
 import numpy as np
 
@@ -7,18 +5,14 @@ from src.images import Image
 
 
 class PairMatch:
-    def __init__(self, image_a: Image, image_b: Image, matches: Optional[List] = None):
+    def __init__(self, image_a: Image, image_b: Image, matches: list | None = None) -> None:
         """
         Create a new PairMatch object.
 
-        Parameters
-        ----------
-        image_a : Image
-            First image of the pair.
-        image_b : Image
-            Second image of the pair.
-        matches : Optional[List], optional
-            List of matches between image_a and image_b, by default None
+        Args:
+            image_a: First image of the pair
+            image_b: Second image of the pair
+            matches: List of matches between image_a and image_b
         """
         self.image_a = image_a
         self.image_b = image_b
@@ -38,12 +32,9 @@ class PairMatch:
         """
         Compute the homography between the two images of the pair.
 
-        Parameters
-        ----------
-        ransac_reproj_thresh : float, optional
-            Reprojection threshold used in the RANSAC algorithm, by default 5
-        ransac_max_iter : int, optional
-            Number of maximum iterations for the RANSAC algorithm, by default 500
+        Args:
+            ransac_reproj_thresh: reprojection threshold used in the RANSAC algorithm
+            ransac_max_iter: number of maximum iterations for the RANSAC algorithm
         """
         self.matchpoints_a = np.float32(
             [self.image_a.keypoints[match.queryIdx].pt for match in self.matches]
@@ -61,9 +52,7 @@ class PairMatch:
         )
 
     def set_overlap(self) -> None:
-        """
-        Compute and set the overlap region between the two images.
-        """
+        """Compute and set the overlap region between the two images."""
         if self.H is None:
             self.compute_homography()
 
@@ -79,17 +68,12 @@ class PairMatch:
         """
         Check if the pair match is valid (i.e. if there are enough inliers with regard to the overlap region).
 
-        Parameters
-        ----------
-        alpha : float, optional
-            alpha parameter used in the comparison, by default 8
-        beta : float, optional
-            beta parameter used in the comparison, by default 0.3
+        Args:
+            alpha: alpha parameter used in the comparison
+            beta: beta parameter used in the comparison
 
-        Returns
-        -------
-        valid : bool
-            True if the pair match is valid, False otherwise.
+        Returns:
+            valid: True if the pair match is valid, False otherwise
         """
         if self.overlap is None:
             self.set_overlap()
@@ -111,15 +95,11 @@ class PairMatch:
         """
         Check if the given image is contained in the pair match.
 
-        Parameters
-        ----------
-        image : Image
-            Image to check.
+        Args:
+            image: Image to check
 
-        Returns
-        -------
-        bool
-            True if the given image is contained in the pair match, False otherwise.
+        Returns:
+            True if the given image is contained in the pair match, False otherwise
         """
         return self.image_a == image or self.image_b == image
 
