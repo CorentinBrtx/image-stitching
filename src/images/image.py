@@ -3,7 +3,7 @@ import numpy as np
 
 
 class Image:
-    def __init__(self, path: str, size: int | None = None) -> None:
+    def __init__(self, image: np.ndarray, name: str, size: int | None = None) -> None:
         """
         Image constructor.
 
@@ -11,8 +11,8 @@ class Image:
             path: path to the image
             size: maximum dimension to resize the image to
         """
-        self.path = path
-        self.image: np.ndarray = cv2.imread(path)
+        self.path = name
+        self.image = image
         if size is not None:
             h, w = self.image.shape[:2]
             if max(w, h) > size:
