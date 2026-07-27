@@ -39,9 +39,12 @@ def add_image(
         cv2.warpPerspective(image_weights, added_offset @ H, size)[:, :, np.newaxis], 3, axis=2
     )
 
-    normalized_weights = np.zeros_like(weights)
-    normalized_weights = np.divide(
-        weights, (weights + image_weights), where=weights + image_weights != 0
+    normalized_weights = np.zeros_like(weights, dtype=np.float64)
+    np.divide(
+        weights,
+        (weights + image_weights),
+        out=normalized_weights,
+        where=weights + image_weights != 0,
     )
 
     panorama = np.where(
