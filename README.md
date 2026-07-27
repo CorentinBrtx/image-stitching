@@ -2,7 +2,7 @@
 
 Image Stitching algorithm with multi-panoramas, gain compensation, simple blending, and multi-band blending. Part of a project for the Computer Vision course of CentraleSupélec.
 
-The implementation is strongly based on the 2007 paper **Automatic Panoramic Image Stitching using Invariant Features** by Matthew Brown and David G. Lowe : <http://matthewalunbrown.com/papers/ijcv2007.pdf>
+The implementation is strongly based on the 2007 paper [**Automatic Panoramic Image Stitching using Invariant Features**](https://www.cs.ubc.ca/~lowe/papers/07brown.pdf) by Matthew Brown and David G. Lowe.
 
 ## Install
 
