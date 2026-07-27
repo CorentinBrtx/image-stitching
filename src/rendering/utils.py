@@ -63,8 +63,8 @@ def get_offset(corners: list[np.ndarray]) -> np.ndarray:
     top_left, top_right, bottom_left = corners[:3]
     return np.array(
         [
-            [1, 0, max(0, -float(min(top_left[0], bottom_left[0])))],
-            [0, 1, max(0, -float(min(top_left[1], top_right[1])))],
+            [1, 0, max(0, -float(min(top_left[0][0], bottom_left[0][0])))],
+            [0, 1, max(0, -float(min(top_left[1][0], top_right[1][0])))],
             [0, 0, 1],
         ],
         np.float32,

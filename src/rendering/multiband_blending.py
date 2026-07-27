@@ -122,9 +122,14 @@ def build_band_panorama(
             bands[i], offset @ image.H, size[::-1]
         )
 
-    return np.divide(
-        pano_bands, pano_weights[:, :, np.newaxis], where=pano_weights[:, :, np.newaxis] != 0
+    band_panorama = np.zeros_like(pano_bands)
+    np.divide(
+        pano_bands,
+        pano_weights[:, :, np.newaxis],
+        out=band_panorama,
+        where=pano_weights[:, :, np.newaxis] != 0,
     )
+    return band_panorama
 
 
 def multi_band_blending(images: list[Image], num_bands: int, sigma: float) -> np.ndarray:
